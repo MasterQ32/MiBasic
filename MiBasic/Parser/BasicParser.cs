@@ -18,7 +18,7 @@ namespace MiBasic.Parser
 			return parser.Parse();
 		}
 
-		public static Expression ParseExpression(Token[] tokens)
+		public static ExpressionTree ParseExpression(Token[] tokens)
 		{
 			var parser = new BasicParser(tokens);
 			return parser.ParseExpression();
@@ -81,9 +81,6 @@ namespace MiBasic.Parser
 								function.ReturnType = this.ReadType();
 							}
 
-							// here read all function specifications
-							// WHERE, LOCAL, ...
-
 							if (this.PeekToken().Type == TokenType.Delimiter)
 							{
 								// Function Prototype
@@ -97,6 +94,8 @@ namespace MiBasic.Parser
 									specifier = this.ReadKeyword(Keyword.Implementation, Keyword.Local);
 									switch (specifier)
 									{
+										// here read all function specifications
+										// WHERE, LOCAL, ...
 										case Keyword.Local:
 											var local = new VariableDeclaration();
 
@@ -184,7 +183,7 @@ namespace MiBasic.Parser
 			}
 		}
 
-		private Expression ParseExpression()
+		private ExpressionTree ParseExpression()
 		{
 			if (this.Length == 0)
 			{
@@ -196,13 +195,18 @@ namespace MiBasic.Parser
 				var token = this.Tokens[0];
 				if (token.Type == TokenType.Number)
 				{
-					return NumberExpression.FromLiteral(token.Text);
+					return new ExpressionTree()
+					{
+						AdditionalInformation = token.Text,
+						Type = ExpressionType.NumberLiteral,
+					};
 				}
 				else if (token.Type == TokenType.Identifier)
 				{
-					return new VariableExpression()
+					return new ExpressionTree()
 					{
-						VariableName = token.Text,
+						AdditionalInformation = token.Text,
+						Type = ExpressionType.IdentifierLiteral,
 					};
 				}
 				else
@@ -242,9 +246,12 @@ namespace MiBasic.Parser
 				if (unaryOperators.ContainsKey(this.Tokens[0].Text) == false)
 					throw new ParserException(this.Tokens[0], "Invalid unary operator!");
 				var expr = BasicParser.ParseExpression(this.Tokens.Skip(1).ToArray());
-				return new UnaryOperatorExpression(
-					unaryOperators[this.Tokens[0].Text],
-					expr);
+				return new ExpressionTree()
+				{
+					Type = ExpressionType.UnaryOperation,
+					AdditionalInformation = this.Tokens[0].Text,
+					Children = { expr }
+				};
 			}
 
 			foreach (var op in binaryOperators)
@@ -258,10 +265,12 @@ namespace MiBasic.Parser
 					var lhsexp = BasicParser.ParseExpression(lhs);
 					var rhsexp = BasicParser.ParseExpression(rhs);
 
-					if (op.Item2 == BinaryOperator.Assignment)
-						return new AssignmentExpression(lhsexp, rhsexp);
-					else
-						return new ArithmeticExpression(lhsexp, rhsexp, op.Item2);
+					return new ExpressionTree()
+					{
+						Type = ExpressionType.BinaryOperation,
+						AdditionalInformation = op.Item1,
+						Children = { lhsexp, rhsexp }
+					};
 				}
 			}
 
@@ -288,9 +297,14 @@ namespace MiBasic.Parser
 				var parameters = paramlist
 					.SplitAt(splits)
 					.Select(list => BasicParser.ParseExpression(list.ToArray()))
-					.ToArray();
+					.ToList();
 
-				return new FunctionCallExpression(this.Tokens[0].Text, parameters);
+				return new ExpressionTree()
+				{
+					AdditionalInformation = this.Tokens[0].Text,
+					Type = ExpressionType.FunctionCall,
+					Children = parameters,
+				};
 			}
 
 
@@ -327,7 +341,7 @@ namespace MiBasic.Parser
 			}
 		}
 
-		private Expression ReadExpression(Func<Token, bool> isDelimiter)
+		private ExpressionTree ReadExpression(Func<Token, bool> isDelimiter)
 		{
 			var tokens = new List<Token>();
 			for (int length = 0; isDelimiter(this.Tokens[this.Position + length]) == false; length++)

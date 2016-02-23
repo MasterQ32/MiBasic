@@ -1,4 +1,5 @@
 ﻿using MiBasic.Lexer;
+using MiBasic.MiddleEnd;
 using MiBasic.Parser;
 using MiBasic.Tools;
 using System;
@@ -21,115 +22,21 @@ namespace MiBasic
 
 			var moduleDeclaration = BasicParser.Parse(tokens);
 
-			var globalContext = new CodeEnvironment();
-			{ // global types
-				globalContext.Types.Register(BasicType.Void);
-				globalContext.Types.Register(new PrimitiveType() { Name = "Integer" });
-				globalContext.Types.Register(new PrimitiveType() { Name = "Real" });
-				globalContext.Types.Register(new PrimitiveType() { Name = "String" });
-				globalContext.Types.Register(new PrimitiveType() { Name = "Bool" });
+			var globalEnvironment = new CodeEnvironment();
+			{ 
+				// global types
+				globalEnvironment.Types.Register(BasicType.Void);
+				globalEnvironment.Types.Register(new PrimitiveType() { Name = "Integer" });
+				globalEnvironment.Types.Register(new PrimitiveType() { Name = "Real" });
+				globalEnvironment.Types.Register(new PrimitiveType() { Name = "String" });
+				globalEnvironment.Types.Register(new PrimitiveType() { Name = "Bool" });
+
+				// global functions
+
+				// global structure types
 			}
 
-			// extract all types
-			foreach (var typeDecl in moduleDeclaration.StructureTypes)
-			{
-				var type = new StructureType();
-				type.Name = typeDecl.Name;
-
-				if (globalContext.Types[type.Name] != null)
-					throw new SemanticException($"Duplicated type name: {type.Name}");
-				globalContext.Types.Register(type);
-			}
-
-			// setup all extracted types 
-			// this allows using circular dependencies and
-			// also order-independant declarations
-			foreach (var typeDecl in moduleDeclaration.StructureTypes)
-			{
-				var type = (StructureType)globalContext.Types[typeDecl.Name];
-
-				foreach (var member in typeDecl.Members)
-				{
-					if (type[member.Name] != null)
-						throw new SemanticException($"Duplicate member name: {member.Name}");
-					type.Add(member.Name, globalContext.Types[member.Type.Name]);
-				}
-			}
-
-			// gather all global variables
-			foreach(var varDecl in moduleDeclaration.GlobalVariables)
-			{
-				globalContext.Variables.Register(new Variable()
-				{
-					Name = varDecl.Name,
-					Type = globalContext.Types[varDecl.Type.Name],
-				});
-			}
-
-			// gather all functions (without expression translation)
-			foreach(var funDecl in moduleDeclaration.Functions)
-			{
-				if (globalContext.Functions[funDecl.Name] != null)
-					throw new SemanticException($"Duplicate declaration of {funDecl.Name}");
-
-				var function = new Function();
-				function.Name = funDecl.Name;
-				if (funDecl.ReturnType != null)
-					function.ReturnType = globalContext.Types[funDecl.ReturnType.Name];
-				else
-					function.ReturnType = BasicType.Void;
-			
-				foreach(var local in funDecl.LocalVariables)
-				{
-					function.LocalVariables.Register(new LocalVariable()
-					{
-						Name = local.Name,
-						Type = globalContext.Types[local.Type.Name],
-					});
-				}
-				foreach(var param in funDecl.Parameters)
-				{
-					function.Parameters.Add(new Parameter()
-					{
-						Name = param.Name,
-						Type = globalContext.Types[param.Type.Name],
-					});
-				}
-
-				globalContext.Functions.Register(function);
-			}
-
-			/*
-			// Sanitize code:
-			foreach(var function in globalContext.Functions)
-			{
-				var variables = new Container<Variable>();
-				foreach(var global in ast.Globals)
-				{
-					variables.Register(global);
-				}
-				foreach(var param in function.Parameters)
-				{
-					// Override globals with locals
-					variables.Register(param, true);
-				}
-				foreach(var local in function.LocalVariables)
-				{
-					if (variables[local.Name]?.IsLocal == true)
-						throw new SemanticException($"The variable name {local.Name} is already taken by a parameter.");
-					variables.Register(local, true);
-				}
-
-				var context = new CodeEnvironment()
-				{
-					Variables = variables,
-					Types = types,
-					Functions = ast.Functions,
-				};
-
-				function.Code.Sanitize(context);
-			}
-			*/
+			var module = ModuleBuilder.CreateModule(moduleDeclaration, globalEnvironment);
 
 			Console.WriteLine("done.");
 

@@ -22,6 +22,6 @@ namespace MiBasic.Parser
 
 	public sealed class ExpressionInstructionDeclaration : InstructionDeclaration
 	{
-		public Expression Expression { get; set; }
+		public ExpressionTree Expression { get; set; }
 	}
 }

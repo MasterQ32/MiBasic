@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MiBasic
+namespace MiBasic.MiddleEnd
 {
 	public abstract class Instruction
 	{

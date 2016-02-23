@@ -1,16 +1,17 @@
 ﻿using System;
 
-namespace MiBasic
+namespace MiBasic.MiddleEnd
 {
 	public sealed class ArithmeticExpression : Expression
 	{
-		public override bool IsAssignable => false;
-
 		public ArithmeticExpression(
 			Expression lhsexp, 
 			Expression rhsexp,
 			BinaryOperator op)
+			: base(lhsexp.Type)
 		{
+			if (lhsexp.Type != rhsexp.Type)
+				throw new SemanticException($"Type mismatch: {this.LeftHandSide.Type} != {this.RightHandSide.Type}");
 			this.LeftHandSide = lhsexp;
 			this.RightHandSide = rhsexp;
 			this.Operator = op;
@@ -19,16 +20,7 @@ namespace MiBasic
 		public Expression LeftHandSide { get; private set; }
 		public BinaryOperator Operator { get; private set; }
 		public Expression RightHandSide { get; private set; }
-
-		public override void AssignType(CodeEnvironment environment)
-		{
-			this.LeftHandSide.AssignType(environment);
-			this.RightHandSide.AssignType(environment);
-			if (this.LeftHandSide.Type != this.RightHandSide.Type)
-				throw new SemanticException($"Type mismatch: {this.LeftHandSide.Type} != {this.RightHandSide.Type}");
-			this.Type = this.LeftHandSide.Type;
-		}
-
+		
 		private string GetOperatorString()
 		{
 			switch(this.Operator)
@@ -51,15 +43,5 @@ namespace MiBasic
 				(this.RightHandSide?.ToString() ?? "<null>") + 
 				")";
 		}
-	}
-
-	public enum BinaryOperator
-	{
-		Add,
-		Subtract,
-		Multiply,
-		Divide,
-		Modulo,
-		Assignment,
 	}
 }

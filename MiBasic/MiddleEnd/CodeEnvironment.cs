@@ -1,4 +1,4 @@
-﻿namespace MiBasic
+﻿namespace MiBasic.MiddleEnd
 {
 	public sealed class CodeEnvironment
 	{

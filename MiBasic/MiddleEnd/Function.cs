@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MiBasic
+namespace MiBasic.MiddleEnd
 {
 	public class Function : INamedObject
 	{
