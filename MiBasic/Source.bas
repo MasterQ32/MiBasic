@@ -18,8 +18,16 @@ Function func4() Is Integer;
 Function func5(i Is Real) Is Integer;
 Function func6(x Is Real, y Is Real) Is Integer;
 
+
+	Function func(x Is Integer, y Is Integer) Is Integer;
+		
+VARIABLE c Is Integer;
+VARIABLE d Is Integer;
+
 Function implemented()
-		implementation Is
+		local a Is Integer;
+		local b Is Integer;
+implementation Is
 	10 * 30 + 40 - func(10, 20) * (a + b - c * d);
 	-10;
 	10 - -10;

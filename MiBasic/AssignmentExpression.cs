@@ -14,6 +14,17 @@
 
 		public Expression Value { get; private set; }
 
+		public override void AssignType(CodeEnvironment environment)
+		{
+			this.Target.AssignType(environment);
+			this.Value.AssignType(environment);
+
+			if (this.Target.Type != this.Value.Type)
+				throw new SemanticException($"Type mismatch: Cannot assign {this.Value.Type} to {this.Target.Type}");
+
+			this.Type = this.Target.Type;
+		}
+
 		public override string ToString()
 		{
 			return

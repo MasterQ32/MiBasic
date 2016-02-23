@@ -5,8 +5,7 @@ using System.Linq;
 
 namespace MiBasic
 {
-	public sealed class Container<T> : IEnumerable<T>
-		where T : class, INamedObject
+	public sealed class Container<T> : IContainer<T> where T : class, INamedObject
 	{
 		private readonly Dictionary<string, T> types = new Dictionary<string, T>();
 
@@ -17,7 +16,15 @@ namespace MiBasic
 
 		public void Register(T type)
 		{
-			this.types.Add(type.Name, type);
+			this.Register(type, false);
+		}
+
+		public void Register(T type, bool allowOverride)
+		{
+			if (allowOverride)
+				this.types[type.Name] = type;
+			else
+				this.types.Add(type.Name, type);
 		}
 
 		public IEnumerator<T> GetEnumerator()

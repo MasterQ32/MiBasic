@@ -11,6 +11,14 @@ namespace MiBasic
 		{
 		}
 
+		public void Sanitize(CodeEnvironment env)
+		{
+			foreach(var instr in this)
+			{
+				instr.Sanitize(env);
+			}
+		}
+
 		public Instruction this[int index]
 		{
 			get

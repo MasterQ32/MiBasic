@@ -61,6 +61,39 @@ namespace MiBasic
 					Console.WriteLine("\t{0}", instr.ToString());
 				}
             }
+			
+			// Sanitize code:
+			foreach(var function in ast.Functions)
+			{
+				var variables = new Container<Variable>();
+				foreach(var global in ast.Globals)
+				{
+					variables.Register(global);
+				}
+				foreach(var param in function.Parameters)
+				{
+					// Override globals with locals
+					variables.Register(param, true);
+				}
+				foreach(var local in function.LocalVariables)
+				{
+					if (variables[local.Name]?.IsLocal == true)
+						throw new SemanticException($"The variable name {local.Name} is already taken by a parameter.");
+					variables.Register(local, true);
+				}
+
+				var context = new CodeEnvironment()
+				{
+					Variables = variables,
+					Types = types,
+					Functions = ast.Functions,
+				};
+
+				function.Code.Sanitize(context);
+			}
+
+
+			Console.WriteLine("done.");
 
 			Console.ReadLine();
 		}

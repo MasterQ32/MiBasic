@@ -1,11 +1,21 @@
 ﻿namespace MiBasic
 {
-	public sealed class Variable : INamedObject
+	public class Variable : INamedObject
 	{
 		public string Name { get; set; }
 
-		public bool IsLocal { get; set; }
+		public virtual bool IsLocal => false;
 
 		public BasicType Type { get; set; }
+	}
+
+	public class LocalVariable : Variable
+	{
+		public override bool IsLocal => true;
+	}
+
+	public sealed class Parameter : LocalVariable
+	{
+		public int Position { get; set; }
 	}
 }

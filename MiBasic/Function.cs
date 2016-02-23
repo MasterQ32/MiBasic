@@ -14,6 +14,8 @@ namespace MiBasic
 		public ParameterList Parameters { get; } = new ParameterList();
 
 		public Block Code { get; set; } = new Block();
+
+		public Container<LocalVariable> LocalVariables { get; } = new Container<LocalVariable>(); 
 	}
 
 	public sealed class ParameterList : IReadOnlyList<Parameter>
@@ -24,6 +26,7 @@ namespace MiBasic
 		{
 			if (this.list.Any(p => p.Name.IsSemanticEqualTo(param.Name)))
 				throw new InvalidOperationException("Parameter already exists.");
+			param.Position = this.list.Count;
 			this.list.Add(param);
 		}
 
@@ -52,12 +55,5 @@ namespace MiBasic
 		{
 			return ((IReadOnlyList<Parameter>)list).GetEnumerator();
 		}
-	}
-
-	public sealed class Parameter : INamedObject
-	{
-		public string Name { get; set; }
-
-		public BasicType Type { get; set; }
 	}
 }

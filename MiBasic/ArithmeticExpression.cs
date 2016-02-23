@@ -19,7 +19,16 @@ namespace MiBasic
 		public Expression LeftHandSide { get; private set; }
 		public BinaryOperator Operator { get; private set; }
 		public Expression RightHandSide { get; private set; }
-		
+
+		public override void AssignType(CodeEnvironment environment)
+		{
+			this.LeftHandSide.AssignType(environment);
+			this.RightHandSide.AssignType(environment);
+			if (this.LeftHandSide.Type != this.RightHandSide.Type)
+				throw new SemanticException($"Type mismatch: {this.LeftHandSide.Type} != {this.RightHandSide.Type}");
+			this.Type = this.LeftHandSide.Type;
+		}
+
 		private string GetOperatorString()
 		{
 			switch(this.Operator)

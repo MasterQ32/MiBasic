@@ -94,9 +94,26 @@ namespace MiBasic
 							}
 							else
 							{
-								this.ReadKeyword(Keyword.Implementation);
-								this.ReadKeyword(Keyword.Is);
+								Keyword specifier;
+								do
+								{
+									specifier = this.ReadKeyword(Keyword.Implementation, Keyword.Local);
+									switch (specifier)
+									{
+										case Keyword.Local:
+											var local = new LocalVariable();
 
+											local.Name = this.ReadIdentifier();
+											this.ReadKeyword(Keyword.Is);
+											local.Type = this.ReadType();
+											this.ReadDelimiter();
+
+											function.LocalVariables.Register(local);
+											break;
+									}
+								} while (specifier != Keyword.Implementation);
+
+								this.ReadKeyword(Keyword.Is);
 								function.Code = this.ReadBlock();
 							}
 
@@ -182,7 +199,7 @@ namespace MiBasic
 				var token = this.tokens[0];
 				if (token.Type == TokenType.Number)
 				{
-					return NumberExpression.FromLiteral(this.types, token.Text);
+					return NumberExpression.FromLiteral(token.Text);
 				}
 				else if (token.Type == TokenType.Identifier)
 				{
@@ -430,5 +447,6 @@ namespace MiBasic
 		End,
 		Function,
 		Implementation,
+		Local,
 	}
 }

@@ -25,6 +25,12 @@ namespace MiBasic
 			}
 		}
 
+		public override void AssignType(CodeEnvironment environment)
+		{
+			this.Expression.AssignType(environment);
+			this.Type = this.Expression.Type;
+		}
+
 		public override string ToString()
 		{
 			return this.GetOperatorString() + "(" + (this.Expression?.ToString() ?? "<null>") + ")";
