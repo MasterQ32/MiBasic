@@ -15,7 +15,12 @@ namespace MiBasic
 
 		public Block Code { get; set; } = new Block();
 
-		public Container<LocalVariable> LocalVariables { get; } = new Container<LocalVariable>(); 
+		public Container<LocalVariable> LocalVariables { get; } = new Container<LocalVariable>();
+
+		public override string ToString()
+		{
+			return $"{this.Name}({ string.Join(", ", this.Parameters) }) : {this.ReturnType}";
+        }
 	}
 
 	public sealed class ParameterList : IReadOnlyList<Parameter>

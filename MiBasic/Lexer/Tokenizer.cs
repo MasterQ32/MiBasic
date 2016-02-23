@@ -1,4 +1,4 @@
-﻿namespace MiBasic
+﻿namespace MiBasic.Lexer
 {
 	using System;
 	using System.Collections.Generic;

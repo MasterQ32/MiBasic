@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MiBasic.Lexer;
+using MiBasic.Parser;
+using MiBasic.Tools;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,56 +17,91 @@ namespace MiBasic
 
 		static void Main(string[] args)
 		{
-			var types = new Container<BasicType>();
-			{
-				types.Register(BasicType.Void);
-				types.Register(new PrimitiveType() { Name = "Integer" });
-				types.Register(new PrimitiveType() { Name = "Real" });
-				types.Register(new PrimitiveType() { Name = "String" });
-				types.Register(new PrimitiveType() { Name = "Bool" });
-			}
-
 			var tokens = Tokenizer.Tokenize(Source);
 
-			/*
-			foreach (var token in tokens)
-			{
-				Console.WriteLine(token);
-			}
-			// */
+			var moduleDeclaration = BasicParser.Parse(tokens);
 
-			var ast = Parser.Parse(types, tokens);
-
-			Console.WriteLine("Module dump:");
-			foreach(var variable in ast.Globals)
-			{
-				Console.WriteLine("\t{0} : {1}", variable.Name, variable.Type);
+			var globalContext = new CodeEnvironment();
+			{ // global types
+				globalContext.Types.Register(BasicType.Void);
+				globalContext.Types.Register(new PrimitiveType() { Name = "Integer" });
+				globalContext.Types.Register(new PrimitiveType() { Name = "Real" });
+				globalContext.Types.Register(new PrimitiveType() { Name = "String" });
+				globalContext.Types.Register(new PrimitiveType() { Name = "Bool" });
 			}
-			foreach (var type in ast.StructureTypes)
+
+			// extract all types
+			foreach (var typeDecl in moduleDeclaration.StructureTypes)
 			{
-				Console.WriteLine("\t{0} [", type.Name);
-				foreach(var member in type)
+				var type = new StructureType();
+				type.Name = typeDecl.Name;
+
+				if (globalContext.Types[type.Name] != null)
+					throw new SemanticException($"Duplicated type name: {type.Name}");
+				globalContext.Types.Register(type);
+			}
+
+			// setup all extracted types 
+			// this allows using circular dependencies and
+			// also order-independant declarations
+			foreach (var typeDecl in moduleDeclaration.StructureTypes)
+			{
+				var type = (StructureType)globalContext.Types[typeDecl.Name];
+
+				foreach (var member in typeDecl.Members)
 				{
-					Console.WriteLine("\t\t{0} : {1}", member.Name, member.Type);
+					if (type[member.Name] != null)
+						throw new SemanticException($"Duplicate member name: {member.Name}");
+					type.Add(member.Name, globalContext.Types[member.Type.Name]);
 				}
-				Console.WriteLine("\t]");
 			}
 
-			foreach(var function in ast.Functions)
+			// gather all global variables
+			foreach(var varDecl in moduleDeclaration.GlobalVariables)
 			{
-				Console.WriteLine(
-					"{0} {1}({2})",
-					function.ReturnType,
-					function.Name,
-					string.Join(", ", function.Parameters.Select(p => $"{p.Type} {p.Name}")));
-				foreach (var instr in function.Code)
+				globalContext.Variables.Register(new Variable()
 				{
-					Console.WriteLine("\t{0}", instr.ToString());
-				}
-            }
+					Name = varDecl.Name,
+					Type = globalContext.Types[varDecl.Type.Name],
+				});
+			}
+
+			// gather all functions (without expression translation)
+			foreach(var funDecl in moduleDeclaration.Functions)
+			{
+				if (globalContext.Functions[funDecl.Name] != null)
+					throw new SemanticException($"Duplicate declaration of {funDecl.Name}");
+
+				var function = new Function();
+				function.Name = funDecl.Name;
+				if (funDecl.ReturnType != null)
+					function.ReturnType = globalContext.Types[funDecl.ReturnType.Name];
+				else
+					function.ReturnType = BasicType.Void;
 			
+				foreach(var local in funDecl.LocalVariables)
+				{
+					function.LocalVariables.Register(new LocalVariable()
+					{
+						Name = local.Name,
+						Type = globalContext.Types[local.Type.Name],
+					});
+				}
+				foreach(var param in funDecl.Parameters)
+				{
+					function.Parameters.Add(new Parameter()
+					{
+						Name = param.Name,
+						Type = globalContext.Types[param.Type.Name],
+					});
+				}
+
+				globalContext.Functions.Register(function);
+			}
+
+			/*
 			// Sanitize code:
-			foreach(var function in ast.Functions)
+			foreach(var function in globalContext.Functions)
 			{
 				var variables = new Container<Variable>();
 				foreach(var global in ast.Globals)
@@ -91,7 +129,7 @@ namespace MiBasic
 
 				function.Code.Sanitize(context);
 			}
-
+			*/
 
 			Console.WriteLine("done.");
 

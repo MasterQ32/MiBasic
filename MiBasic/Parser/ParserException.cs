@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using MiBasic.Lexer;
 
-namespace MiBasic
+namespace MiBasic.Parser
 {
 	[Serializable]
 	internal class ParserException : Exception

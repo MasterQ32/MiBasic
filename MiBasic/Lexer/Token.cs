@@ -1,4 +1,4 @@
-﻿namespace MiBasic
+﻿namespace MiBasic.Lexer
 {
 	public sealed class Token
 	{

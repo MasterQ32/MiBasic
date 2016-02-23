@@ -7,7 +7,9 @@
 		public virtual bool IsLocal => false;
 
 		public BasicType Type { get; set; }
-	}
+
+		public override string ToString() => $"{this.Name} : {this.Type}";
+    }
 
 	public class LocalVariable : Variable
 	{
