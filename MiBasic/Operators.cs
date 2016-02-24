@@ -10,7 +10,7 @@ namespace MiBasic
 	{
 		public static UnaryOperator UnaryFromString(string text)
 		{
-			switch(text)
+			switch (text)
 			{
 				case "~": return UnaryOperator.Invert;
 				case "-": return UnaryOperator.Negate;
@@ -31,6 +31,30 @@ namespace MiBasic
 				case "=": return BinaryOperator.Assignment;
 				default:
 					throw new InvalidOperationException($"{text} is not a valid binary operator.");
+			}
+		}
+
+		public static string ToString(BinaryOperator @operator)
+		{
+			switch (@operator)
+			{
+				case BinaryOperator.Add: return "+";
+				case BinaryOperator.Assignment: return "=";
+				case BinaryOperator.Divide: return "/";
+				case BinaryOperator.Modulo: return "%";
+				case BinaryOperator.Multiply: return "*";
+				case BinaryOperator.Subtract: return "-";
+				default: throw new InvalidOperationException($"Invalid operator: {@operator}.");
+			}
+		}
+
+		public static string ToString(UnaryOperator @operator)
+		{
+			switch (@operator)
+			{
+				case UnaryOperator.Invert: return "~";
+				case UnaryOperator.Negate: return "-";
+				default: throw new InvalidOperationException($"Invalid operator: {@operator}.");
 			}
 		}
 	}

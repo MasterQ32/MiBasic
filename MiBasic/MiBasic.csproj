@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackEnd\C\CodeGenerator.cs" />
     <Compile Include="MiddleEnd\ArithmeticExpression.cs" />
     <Compile Include="MiddleEnd\AssignmentExpression.cs" />
     <Compile Include="MiddleEnd\BasicType.cs" />

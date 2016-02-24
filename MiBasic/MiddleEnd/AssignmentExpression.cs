@@ -5,6 +5,8 @@
 		public AssignmentExpression(Expression lhsexp, Expression rhsexp) :
 			base(lhsexp.Type, true)
 		{
+			if (lhsexp.IsAssignable == false)
+				throw new SemanticException("Assignment to inassignable expression!");
 			if (lhsexp.Type != rhsexp.Type)
 				throw new SemanticException($"Type mismatch: {rhsexp.Type} is not assignable to {lhsexp.Type}");
 			this.Target = lhsexp;

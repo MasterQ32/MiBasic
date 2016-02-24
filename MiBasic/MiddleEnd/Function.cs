@@ -13,7 +13,9 @@ namespace MiBasic.MiddleEnd
 
 		public ParameterList Parameters { get; } = new ParameterList();
 
-		public Block Code { get; set; } = new Block();
+		public Block Code { get; set; } = null;
+
+		public bool IsImplemented => (this.Code != null);
 
 		public Container<LocalVariable> LocalVariables { get; } = new Container<LocalVariable>();
 

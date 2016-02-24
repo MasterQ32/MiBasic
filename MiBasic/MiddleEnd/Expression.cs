@@ -18,11 +18,6 @@ namespace MiBasic.MiddleEnd
 			this.Type = type;
 			this.IsAssignable = isAssignable;
 		}
-
-		public virtual void AssignType(CodeEnvironment environment)
-		{
-			throw new SemanticException($"{this.GetType().Name} does not support any kind of type matching.");
-		}
 	}
 
 	public class NumberExpression : Expression

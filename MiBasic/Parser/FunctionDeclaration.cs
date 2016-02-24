@@ -13,7 +13,7 @@ namespace MiBasic.Parser
 
 		public BasicTypeName ReturnType { get; set; }
 
-		public IList<InstructionDeclaration> Code { get; set; } = new List<InstructionDeclaration>();
+		public IList<InstructionDeclaration> Code { get; set; } = null;
 	}
 
 	public abstract class InstructionDeclaration

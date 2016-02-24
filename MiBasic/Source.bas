@@ -28,12 +28,13 @@ Function implemented()
 		local a Is Integer;
 		local b Is Integer;
 implementation Is
-	10 * 30 + 40 - func(10, 20) * (a + b - c * d);
-	-10;
-	10 - -10;
-	10 - ~10;
-	-a;
-	a +-b;
-	a +-10;
+	a = 10 * 30 + 40 - func(10, 20) * (a + b - c * d);
+	a = -10;
+	a = 10 - -10;
+	a = 10 - ~10;
+	a = -a;
+	a = a + -b;
+	a = a + -10;
 	a = 10 + 20;
+	((b)) = 20;
 End

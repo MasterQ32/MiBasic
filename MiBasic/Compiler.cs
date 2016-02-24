@@ -38,7 +38,11 @@ namespace MiBasic
 
 			var module = ModuleBuilder.CreateModule(moduleDeclaration, globalEnvironment);
 
-			Console.WriteLine("done.");
+
+			Console.WriteLine("// done.");
+			Console.WriteLine("// Generating C code:");
+
+			BackEnd.C.CodeGenerator.Generate(Console.Out, module);
 
 			Console.ReadLine();
 		}
